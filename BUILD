@@ -1,1 +1,1 @@
-DD-WRT v3.0-r32170M kongac (06/03/17)
+Compatible with kernel 3.10 R7000 builds
