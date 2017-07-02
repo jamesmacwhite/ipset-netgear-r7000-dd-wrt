@@ -4,7 +4,9 @@ Packages and kernel modules for ipset support.
 
 ## Introduction
 
-`ipset` support is a somewhat challenging on DD-WRT because several key components for it are not built into the firmware. While DD-WRT can be extended by compiling and rolling your own firmware builds, this is a rather complex and overkill approach for adding additional packages. This repo is a collection of additional ipk packages and kernel modules for ipset support on DD-WRT.
+`ipset` support is a somewhat challenging on DD-WRT because several key components for it are not built into the firmware. While DD-WRT can be extended by compiling userland tools and rolling your own firmware builds, this is a rather complex and overkill approach for adding additional packages. This repository is a collection of additional ipk packages and kernel modules for ipset support on DD-WRT.
+
+**Note:** These packages and modules are provided as is with no warranty/support. They have been tested on a R7000 running DD-WRT firmware, other router models may vary. 
 
 ## Packages
 
@@ -26,7 +28,7 @@ Compile time options: IPv6 GNU-getopt no-RTC no-DBus no-i18n no-IDN DHCP DHCPv6 
 
 ## Kernel module
 
-In order for ipset and iptables to work together the `xt_set.ko` kernel module is needed. Chances are, this will not be present in anny DD-WRT build currently. This is compiled using the DD-WRT kerenel sources and matches the kernel branch of the R7000.
+In order for ipset and iptables to work together the `xt_set.ko` kernel module is needed. Chances are, this will not be present in any DD-WRT build currently. This is compiled using the DD-WRT kerenel sources and matches the kernel branch of the R7000.
 
 ## Installation
 
@@ -36,7 +38,7 @@ The kernel module can be placed within /jffs/usr/lib/modules and be loaded at bo
 
 JFFS is better for kernel modules as its a storage partition available early in the boot process. Alternatively you can also use /opt but may have to delay executing code related to this module till a bit later on in the boot process, to ensure the USB device holding /opt is available.
 
-# Example tutorials using ipset
+### Example tutorials using ipset
 
 Once you've got `ipset` support setup on DD-WRT, you'll now what to start using it. Here's a few tutorials on what you can do:
 
