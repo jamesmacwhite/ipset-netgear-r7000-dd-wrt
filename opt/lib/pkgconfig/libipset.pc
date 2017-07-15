@@ -1,0 +1,11 @@
+prefix=/opt
+exec_prefix=/opt
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libipset
+Description: Userspace library for the ipset extensions and the kernel interface
+Version: 6.32
+Cflags: -I${includedir}
+Libs: -L${libdir} -lipset
+Requires.private: libmnl >= 1
