@@ -8,7 +8,11 @@ Additional packages and kernel modules for ipset support.
 
 **Note:** These packages and modules are provided as is with no warranty/support. They have been tested on a R7000 running DD-WRT firmware, other router models may vary. 
 
-## Additional packages
+## Project directory structure
+
+This explains what each directory is for and its purpose is related to ipset support.
+
+### ipk directory
 
 The additional packages are mostly taken from the [Entware-ng](https://github.com/Entware-ng/Entware-ng) project compiled with a compatible ARM toolchain that works on DD-WRT as well. You will need several additional packages for `ipset`. They are:
 
@@ -26,15 +30,29 @@ Compile time options: IPv6 GNU-getopt no-RTC no-DBus no-i18n no-IDN DHCP DHCPv6 
 
 `ipset` itself is compiled using the build system in Entware-ng (which uses the OpenWRT buildroot) but with DD-WRT kernel sources to be compatible.
 
-## xt_set.ko kernel module
+### xt_set.ko kernel module
 
 In order for ipset and iptables to work together the `xt_set.ko` kernel module is needed. Chances are, this will not be present in any DD-WRT build currently. This is compiled using the DD-WRT kernel sources and matches the firmware kernel branch of the R7000 (currently linux-4.4).
 
-Getting the right kernel source and toolchain is important when building modules, otherwise when attempting to load them you may kernel panic and crash your router.
+Getting the right kernel source and toolchain is important when building modules, otherwise when attempting to load them you may kernel panic and crash your router. Likewise, you cannot simply use a module compiled on the 3.10 kernel compared to the 4.x kernel and vice versa, you'll also likely crash your router upon attempting to load the module.
+
+### opt directory
+
+If you don't have `opkg` installed, you can alternatively copy the entire contents of the `/opt` directory to your routers JFFS partition or a seperate mounted USB device. You will need to make sure you place the contents that matches the DD-WRT $PATH variable. Typically, this is what the DD-WRT path variable looks like:
+
+```
+/bin:/usr/bin:/sbin:/usr/sbin:/jffs/sbin:/jffs/bin:/jffs/usr/sbin:/jffs/usr/bin:/mmc/sbin:/mmc/bin:/mmc/usr/sbin:/mmc/usr/bin:/opt/sbin:/opt/bin:/opt/usr/sbin:/opt/usr/bin
+```
+
+This however is not recommended unless you know what you are doing, you'll also need to make sure you copy over the /opt folder preserving symlinks. If possible install via the ipk packages provided, its a lot easier.
 
 ## Installation
 
 All `.ipk` packages need to be installed via `opkg` if you already use Entware-ng or similar, you can install the packages straight to /opt.
+
+```
+opkg install /path/to/package.ipk
+```
 
 For `dnsmasq` and `iptables` you can either "overwrite" the built in versions using mount:
 
