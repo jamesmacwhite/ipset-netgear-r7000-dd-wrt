@@ -16,23 +16,25 @@ This explains what each directory is for and its purpose is related to ipset sup
 
 The additional packages are mostly taken from the [Entware-ng](https://github.com/Entware-ng/Entware-ng) project compiled with a compatible ARM toolchain that works on DD-WRT as well. You will need several additional packages for `ipset`. They are:
 
-* ipset - As a static binary compiled with the matching DD-WRT kernel source tree
+* ipset (version 6) - Compiled with the matching DD-WRT kernel source tree
 * dnsmasq-full - To replace the version of dnsmasq built into DD-WRT
 * iptables - A newer version of iptables to use commands like `--match-set`
 
 While DD-WRT comes with both `dnsmasq` and `iptables` already, the `dnsmasq` version is compiled without `ipset` support, in addition the `iptables` version is a custom 1.3.7 version which is too old for some `ipset` based firewall rules.
 
-Default compile time options of the built in `dnsmasq` version:
-
-```
-Compile time options: IPv6 GNU-getopt no-RTC no-DBus no-i18n no-IDN DHCP DHCPv6 no-Lua no-TFTP no-conntrack no-ipset no-auth DNSSEC loop-detect no-inotify
-```
-
 `ipset` itself is compiled using the build system in Entware-ng (which uses the OpenWRT buildroot) but with DD-WRT kernel sources to be compatible.
+
+These packages can be installed with the `opkg` command.
+
+Example:
+
+```
+opkg install /path/to/package.ipk
+```
 
 ### xt_set.ko kernel module
 
-In order for ipset and iptables to work together the `xt_set.ko` kernel module is needed. Chances are, this will not be present in any DD-WRT build currently. This is compiled using the DD-WRT kernel sources and matches the firmware kernel branch of the R7000 (currently linux-4.4).
+In order for ipset and iptables to work together the `xt_set.ko` kernel module is needed. Chances are, this will not be present in any DD-WRT build currently. This is compiled using the DD-WRT kernel sources and matches the latest firmware kernel branch of the R7000 (currently linux-4.4).
 
 Getting the right kernel source and toolchain is important when building modules, otherwise when attempting to load them you may kernel panic and crash your router. Likewise, you cannot simply use a module compiled on the 3.10 kernel compared to the 4.x kernel and vice versa, you'll also likely crash your router upon attempting to load the module.
 
@@ -46,13 +48,7 @@ If you don't have `opkg` installed, you can alternatively copy the entire conten
 
 This however is not recommended unless you know what you are doing, you'll also need to make sure you copy over the /opt folder preserving symlinks. If possible install via the ipk packages provided, its a lot easier.
 
-## Installation
-
-All `.ipk` packages need to be installed via `opkg` if you already use Entware-ng or similar, you can install the packages straight to /opt.
-
-```
-opkg install /path/to/package.ipk
-```
+## Adding ipset support to DD-WRT
 
 For `dnsmasq` and `iptables` you can either "overwrite" the built in versions using mount:
 
