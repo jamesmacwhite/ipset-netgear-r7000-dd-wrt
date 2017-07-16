@@ -36,7 +36,7 @@ opkg install /path/to/package.ipk
 
 In order for ipset and iptables to work together the `xt_set.ko` kernel module is needed. Chances are, this will not be present in any DD-WRT build currently. This is compiled using the DD-WRT kernel sources and matches the latest firmware kernel branch of the R7000 (currently linux-4.4).
 
-Getting the right kernel source and toolchain is important when building modules, otherwise when attempting to load them you may kernel panic and crash your router. Likewise, you cannot simply use a module compiled on the 3.10 kernel compared to the 4.x kernel and vice versa, you'll also likely crash your router upon attempting to load the module.
+Getting the right kernel source and toolchain is important when building modules, otherwise when attempting to load them you may kernel panic and crash your router. Likewise, you cannot simply use a module compiled on the 3.10 kernel compared to the 4.4.x kernel and vice versa, you'll also likely crash your router upon attempting to load the module.
 
 ### opt directory
 
@@ -82,18 +82,18 @@ For `iptables` you can place additional rules within the usual `.rc_firewall` bu
 The kernel module for `xt_set.ko` can be placed within /jffs/usr/lib/modules and be loaded at boot time, using `insmod`:
 
 ```
-insmod /jffs/usr/lib/modules/4.4.x/xt_set.ko
+insmod /jffs/usr/lib/modules/4.4/xt_set.ko
 ```
 
 If everything was successful, you will get no prompt returned, running the same command again should yield something similar to:
 
 ```
-insmod: cannot insert '/jffs/usr/lib/modules/4.4.70/xt_set.ko': File exists
+insmod: cannot insert '/jffs/usr/lib/modules/4.4/xt_set.ko': File exists
 ```
 
-This means the module is loaded.
+This means the module is now loaded. You can also confirm this by running `lsmod | grep "xt_set"`.
 
-Ensure to change the kernel version in the `insmod` command to whatever kernel source it was built from as stated in the repo. The kernel module is versioned because its important to keep track of what kernel source its come from. You can sometimes get away with using a kernel module that is "slightly" different to the version used in a DD-WRT build, but its risky.
+Ensure to change the kernel version in the `insmod` command to whatever kernel source it was built from as stated in the repo. The kernel module is versioned because its important to keep track of what kernel source its come from. You can mostly get away with using a kernel module that is from a slightly different sublevel, but in most cases not an entirely different kernel version.
 
 JFFS storage is better for kernel modules as its a storage partition available early in the boot process. Alternatively you can also use /opt but may have to delay executing code related to this module till a bit later on in the boot process, to ensure the USB device holding /opt is available.
 
