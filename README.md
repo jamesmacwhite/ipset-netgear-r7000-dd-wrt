@@ -6,7 +6,7 @@ Additional packages and kernel modules for ipset support.
 
 `ipset` support is a somewhat challenging on DD-WRT because several key components for it are not currently built into the firmware. While DD-WRT can be extended by compiling additional userland tools and rolling your own firmware builds with the DD-WRT toolchain, this is a rather complex and overkill approach for adding additional features like `ipset`. This repository is a collection of additional ipk packages and kernel modules for ipset support on DD-WRT all in one place.
 
-**Note:** These packages and modules are provided as is with no warranty/support. They have been tested on a R7000 (used in my own network) running DD-WRT firmware, other router models may vary. 
+**Note:** These packages and modules are provided as is with no warranty/support. They have been tested on a R7000 (used in my own network) running DD-WRT firmware, other router models may vary.
 
 ## Project directory structure
 
@@ -14,13 +14,13 @@ This explains what each directory is for and its purpose is related to ipset sup
 
 ### ipk directory
 
-The additional packages are mostly taken from the [Entware-ng](https://github.com/Entware-ng/Entware-ng) project compiled with a compatible ARM toolchain that works on DD-WRT as well. You will need several additional packages for `ipset`. They are:
+The additional packages are mostly taken from the [Entware-ng](https://github.com/Entware-ng/Entware-ng) project compiled with a compatible ARM toolchain that works on DD-WRT as well. You will need several additional packages for complete `ipset`. They are:
 
 * ipset (version 6) - Compiled with the matching DD-WRT kernel source tree
-* dnsmasq-full - To replace the version of dnsmasq built into DD-WRT
+* dnsmasq-full - To replace the version of dnsmasq built into DD-WRT in order to use `ipset=/` policies
 * iptables - A newer version of iptables to use commands like `--match-set`
 
-The .ipk of dnsmasq provides the following compile time options (version may vary):
+Here are the compile time options for dnsmasq I build with (version will vary, noted in the ipk filename):
 
 ```
 root@NETGEAR-R7000:~# /opt/sbin/dnsmasq -v
@@ -28,7 +28,7 @@ Dnsmasq version 2.77rc5  Copyright (c) 2000-2016 Simon Kelley
 Compile time options: IPv6 GNU-getopt no-RTC no-DBus no-i18n no-IDN DHCP DHCPv6 no-Lua TFTP conntrack ipset auth DNSSEC no-ID loop-detect inotify
 ```
 
-While DD-WRT comes with both `dnsmasq` and `iptables` already, the `dnsmasq` version is compiled without `ipset` support, in addition the `iptables` version is a custom 1.3.7 build which is too old for some `ipset` based firewall rules.
+While DD-WRT comes with both `dnsmasq` and `iptables` already, the `dnsmasq` version is compiled without `ipset` support, in addition the `iptables` version is v1.3.7 which is too old for some `ipset` based firewall rules.
 
 `ipset` itself is compiled using the build system in Entware-ng (which uses the OpenWRT buildroot) but with DD-WRT kernel sources to be compatible where needed.
 
@@ -44,7 +44,7 @@ In some cases you may also need to use the `--force-checksum` flag.
 
 ### xt_set.ko kernel module
 
-In order for ipset and iptables to work together the `xt_set.ko` kernel module is needed. This will not be present in any DD-WRT build currently. This is compiled using the DD-WRT kernel sources and matches the latest firmware kernel branch of the R7000 (currently `linux-4.4`).
+In order for iptables to work with ipset the `xt_set.ko` kernel module is needed. This will not be present in any DD-WRT build currently. This is compiled using the DD-WRT kernel sources and matches the latest firmware kernel branch of the R7000 (currently `linux-4.4`).
 
 Getting the right kernel source and toolchain is important when building modules, otherwise when attempting to load them you may kernel panic and crash your router. Likewise, you cannot simply use a module compiled on the 3.10 kernel compared to the 4.4.x kernel and vice versa, you'll also likely crash your router upon attempting to load the module. This project includes the required kernel for both `linux-3.10` and `linux-4.4` builds.
 
@@ -56,11 +56,11 @@ If you don't have `opkg` installed, you can alternatively copy the entire conten
 /bin:/usr/bin:/sbin:/usr/sbin:/jffs/sbin:/jffs/bin:/jffs/usr/sbin:/jffs/usr/bin:/mmc/sbin:/mmc/bin:/mmc/usr/sbin:/mmc/usr/bin:/opt/sbin:/opt/bin:/opt/usr/sbin:/opt/usr/bin
 ```
 
-This however is not recommended unless you know what you are doing, you'll also need to make sure you copy over the /opt folder preserving symlinks. 99.9% of users should install via the .ipk packages provided, its a lot easier!
+This however is not recommended unless you know what you are doing, you'll also need to make sure you copy over the /opt folder preserving symlinks. 99.9% of users should install via the .ipk packages provided, its a lot easier! If however you want to cherry pick the binaries, this is possible.
 
 ## Adding ipset support to DD-WRT
 
-For `dnsmasq` and `iptables` you can either "overwrite" the built in versions using mount:
+For `dnsmasq` and `iptables` you can overwrite the built in versions using mount:
 
 ```
 mount -o bind /opt/usr/sbin/dnsmasq /usr/sbin/dnsmasq
@@ -68,7 +68,7 @@ mount -o bind /opt/usr/sbin/iptables /usr/sbin/iptables
 mount -o bind /opt/usr/sbin/ip6tables /usr/sbin/ip6tables
 ```
 
-This can however cause problems.
+This can however cause problems as the firmware was not originally built with these versions.
 
 Alternatively, if you are using Entware-ng already, you can actually take advantage of running `dnsmasq` via the init.d script included: at `/opt/etc/init.d/S56dnsmasq`
 
