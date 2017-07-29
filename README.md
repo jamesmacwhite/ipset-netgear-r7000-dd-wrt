@@ -20,7 +20,7 @@ The additional packages are mostly taken from the [Entware-ng](https://github.co
 * dnsmasq-full - To replace the version of dnsmasq built into DD-WRT
 * iptables - A newer version of iptables to use commands like `--match-set`
 
-The ipk of the dnsmasq provides the following compile time options (version may vary):
+The .ipk of dnsmasq provides the following compile time options (version may vary):
 
 ```
 root@NETGEAR-R7000:~# /opt/sbin/dnsmasq -v
