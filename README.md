@@ -27,6 +27,8 @@ root@NETGEAR-R7000:~# /opt/sbin/dnsmasq -v
 Dnsmasq version 2.77rc5  Copyright (c) 2000-2016 Simon Kelley
 Compile time options: IPv6 GNU-getopt no-RTC no-DBus no-i18n no-IDN DHCP DHCPv6 no-Lua TFTP conntrack ipset auth DNSSEC no-ID loop-detect inotify
 ```
+ 
+**Note:** Due to [several security vulnerabilities found with dnsmasq](https://security.googleblog.com/2017/10/behind-masq-yet-more-dns-and-dhcp.html) version < 2.78. It is recommended you only use dnsmasq version 2.78 or later.
 
 While DD-WRT comes with both `dnsmasq` and `iptables` already, the `dnsmasq` version is compiled without `ipset` support, in addition the `iptables` version is v1.3.7 which is too old for some `ipset` based firewall rules.
 
