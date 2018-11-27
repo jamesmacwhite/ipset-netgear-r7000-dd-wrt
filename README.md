@@ -14,25 +14,19 @@ This explains what each directory is for and its purpose is related to ipset sup
 
 ### ipk directory
 
-The additional packages are mostly taken from the [Entware-ng](https://github.com/Entware-ng/Entware-ng) project compiled with a compatible ARM toolchain that works on DD-WRT as well. You will need several additional packages for complete `ipset`. They are:
+The additional packages are mostly taken from the [Entware](https://github.com/Entware/Entware) project compiled with a compatible ARM toolchain that works on DD-WRT as well. You will need several additional packages for complete `ipset`. They are:
 
 * ipset (version 6) - Compiled with the matching DD-WRT kernel source tree
-* dnsmasq-full - To replace the version of dnsmasq built into DD-WRT in order to use `ipset=/` policies
+* dnsmasq-full - To replace the version of dnsmasq built into DD-WRT in order to use `ipset=/` policies (compiled with ipset support)
 * iptables - A newer version of iptables to use commands like `--match-set`
 
 Here are the compile time options for dnsmasq I build with (version will vary, noted in the ipk filename):
-
-```
-root@NETGEAR-R7000:~# /opt/sbin/dnsmasq -v
-Dnsmasq version 2.77rc5  Copyright (c) 2000-2016 Simon Kelley
-Compile time options: IPv6 GNU-getopt no-RTC no-DBus no-i18n no-IDN DHCP DHCPv6 no-Lua TFTP conntrack ipset auth DNSSEC no-ID loop-detect inotify
-```
  
 **Note:** Due to [several security vulnerabilities found with dnsmasq](https://security.googleblog.com/2017/10/behind-masq-yet-more-dns-and-dhcp.html) version < 2.78. It is recommended you only use dnsmasq version 2.78 or later.
 
 While DD-WRT comes with both `dnsmasq` and `iptables` already, the `dnsmasq` version is compiled without `ipset` support, in addition the `iptables` version is v1.3.7 which is too old for some `ipset` based firewall rules.
 
-`ipset` itself is compiled using the build system in Entware-ng (which uses the OpenWRT buildroot) but with DD-WRT kernel sources to be compatible where needed.
+`ipset` itself is compiled using the build system in Entware (which uses the OpenWRT buildroot) but with DD-WRT kernel sources to be compatible where needed, a somewhat hybrid approach.
 
 These packages can be installed with the `opkg` command.
 
@@ -72,7 +66,7 @@ mount -o bind /opt/usr/sbin/ip6tables /usr/sbin/ip6tables
 
 This can however cause problems as the firmware was not originally built with these versions.
 
-Alternatively, if you are using Entware-ng already, you can actually take advantage of running `dnsmasq` via the init.d script included: at `/opt/etc/init.d/S56dnsmasq`
+Alternatively, if you are using Entware already, you can actually take advantage of running `dnsmasq` via the init.d script included: at `/opt/etc/init.d/S56dnsmasq`
 
 Change `ARGS` to match the arguments used by DD-WRT:
 
@@ -80,7 +74,7 @@ Change `ARGS` to match the arguments used by DD-WRT:
 -u root -g root --conf-file=/tmp/dnsmasq.conf --cache-size=1500
 ```
 
-This allows you to essentially use the `dnsmasq` binary with `ipset` support while using the DD-WRT firmware `dnsmasq.conf` file allowing you to still make changes to `dnsmasq` normally. Finally, you'll need to stop the DD-WRT `dnsmasq` server and start the Entware-ng version. You'll want to put this in your `.rc_startup`.
+This allows you to essentially use the `dnsmasq` binary with `ipset` support while using the DD-WRT firmware `dnsmasq.conf` file allowing you to still make changes to `dnsmasq` normally. Finally, you'll need to stop the DD-WRT `dnsmasq` server and start the Entware version. You'll want to put this in your `.rc_startup`.
 
 ```
 stopservice dnsmasq
@@ -103,7 +97,7 @@ insmod: cannot insert '/jffs/usr/lib/modules/4.4/xt_set.ko': File exists
 
 This means the module is now loaded. You can also confirm this by running `lsmod | grep "xt_set"`.
 
-Ensure to change the kernel version in the `insmod` command to whatever kernel source it was built from as stated in the repo. The kernel module is versioned by kernel source because its important to keep track of what Linux kernel base source its come from. You can mostly get away with using a kernel module that is from a slightly different sublevel, but in most cases not an entirely different kernel version altogether.
+Ensure to change the kernel version in the `insmod` command to whatever kernel source it was built from as stated in the repo. The kernel module is versioned by kernel source because its important to keep track of what Linux kernel base source its come from. You can mostly get away with using a kernel module that is from a slightly different sublevel, but in most cases not an entirely different kernel version altogether. It is recommended to compile any kernel module against the same kernel source and sublevel relative to your firmware build to avoid instability and potentially random reboots.
 
 JFFS storage is better for kernel modules as its a storage partition available early in the boot process. Alternatively you can also use /opt but you may have to delay executing code related to this module till a bit later on in the boot process, to ensure the USB device holding the /opt mountpoint is available.
 
