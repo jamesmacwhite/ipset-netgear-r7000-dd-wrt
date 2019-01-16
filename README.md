@@ -26,8 +26,6 @@ Here are the compile time options for dnsmasq I build with (version will vary, n
 
 While DD-WRT comes with both `dnsmasq` and `iptables` already, the `dnsmasq` version is compiled without `ipset` support, in addition the `iptables` version is v1.3.7 which is too old for some `ipset` based firewall rules.
 
-`ipset` itself is compiled using the build system in Entware (which uses the OpenWRT buildroot) but with DD-WRT kernel sources to be compatible where needed, a somewhat hybrid approach.
-
 These packages can be installed with the `opkg` command.
 
 Example:
@@ -40,9 +38,9 @@ In some cases you may also need to use the `--force-checksum` flag.
 
 ### xt_set.ko kernel module
 
-In order for iptables to work with ipset the `xt_set.ko` kernel module is needed. This will not be present in any DD-WRT build currently. This is compiled using the DD-WRT kernel sources and matches the latest firmware kernel branch of the R7000 (currently `linux-4.4`).
+In order for iptables to work with ipset the `xt_set.ko` kernel module is needed. This is not present in any DD-WRT build currently. This is compiled using the DD-WRT kernel sources and matches the latest firmware kernel branch of the R7000 (currently `linux-4.4`).
 
-Getting the right kernel source and toolchain is important when building modules, otherwise when attempting to load them you may kernel panic and crash your router. Likewise, you cannot simply use a module compiled on the 3.10 kernel compared to the 4.4.x kernel and vice versa, you'll also likely crash your router upon attempting to load the module. This project includes the required kernel for both `linux-3.10` and `linux-4.4` builds.
+Getting the right kernel source and toolchain is important when building modules, otherwise when attempting to load them you may kernel panic and crash your router. Likewise, you cannot simply use a module compiled on the 3.10 kernel compared to the 4.4 kernel and vice versa, you'll also likely crash your router upon attempting to load the module. This project includes the required kernel for both `linux-3.10` and `linux-4.4` builds. However, it is strongly recommended to use a recent build under the 4.4 kernel branch.
 
 ### opt directory
 
@@ -52,11 +50,11 @@ If you don't have `opkg` installed, you can alternatively copy the entire conten
 /bin:/usr/bin:/sbin:/usr/sbin:/jffs/sbin:/jffs/bin:/jffs/usr/sbin:/jffs/usr/bin:/mmc/sbin:/mmc/bin:/mmc/usr/sbin:/mmc/usr/bin:/opt/sbin:/opt/bin:/opt/usr/sbin:/opt/usr/bin
 ```
 
-This however is not recommended unless you know what you are doing, you'll also need to make sure you copy over the /opt folder preserving symlinks. 99.9% of users should install via the .ipk packages provided, its a lot easier! If however you want to cherry pick the binaries, this is possible.
+This however is not recommended unless you know what you are doing, you'll also need to make sure you copy over the /opt folder preserving symlinks and permissions. 99.9% of users should install via the .ipk packages provided, its a lot easier! If however you want to cherry pick the binaries, this is possible.
 
 ## Adding ipset support to DD-WRT
 
-For `dnsmasq` and `iptables` you can overwrite the built in versions using mount:
+For `dnsmasq` and `iptables` you can overwrite the built in versions using a mount.
 
 ```
 mount -o bind /opt/usr/sbin/dnsmasq /usr/sbin/dnsmasq
@@ -64,7 +62,7 @@ mount -o bind /opt/usr/sbin/iptables /usr/sbin/iptables
 mount -o bind /opt/usr/sbin/ip6tables /usr/sbin/ip6tables
 ```
 
-This can however cause problems as the firmware was not originally built with these versions.
+This will essentially redirect any call to the original firmware versions to the specially compiled ones. It provides a simple way of making sure your router uses the correct binaries. This can however cause problems as the firmware was not originally built with these versions.
 
 Alternatively, if you are using Entware already, you can actually take advantage of running `dnsmasq` via the init.d script included: at `/opt/etc/init.d/S56dnsmasq`
 
@@ -97,15 +95,14 @@ insmod: cannot insert '/jffs/usr/lib/modules/4.4/xt_set.ko': File exists
 
 This means the module is now loaded. You can also confirm this by running `lsmod | grep "xt_set"`.
 
-Ensure to change the kernel version in the `insmod` command to whatever kernel source it was built from as stated in the repo. The kernel module is versioned by kernel source because its important to keep track of what Linux kernel base source its come from. You can mostly get away with using a kernel module that is from a slightly different sublevel, but in most cases not an entirely different kernel version altogether. It is recommended to compile any kernel module against the same kernel source and sublevel relative to your firmware build to avoid instability and potentially random reboots.
+Ensure to change the kernel version in the `insmod` command to whatever kernel source it was built from as stated in the repo. The kernel module is versioned by kernel source because its important to keep track of what Linux kernel base source its come from. You can mostly get away with using a kernel module that is from a slightly different sublevel, but in most cases not an entirely different kernel version altogether. It is recommended to compile any kernel module against the same kernel source and sublevel relative to your firmware build to avoid instability.
 
 JFFS storage is better for kernel modules as its a storage partition available early in the boot process. Alternatively you can also use /opt but you may have to delay executing code related to this module till a bit later on in the boot process, to ensure the USB device holding the /opt mountpoint is available.
 
-Sometimes its also good to insmod custom kernel modules manually first, rather than adding `insmod` commands straight into to your `.rc_startup`. The reason being is if the module doesn't load properly and causes a kernel panic, you will essentially throw your router into a boot loop as it will keep trying to load the module causing the problem on startup.
+Sometimes its also good to insmod custom kernel modules manually first, rather than adding `insmod` commands straight into to your `.rc_startup`. The reason being is if the module doesn't load properly and causes a kernel panic, you will essentially throw your router into a boot loop as it will keep trying to load the module causing the problem on startup. 
 
 ### Example tutorials using ipset
 
 Once you've got `ipset` support setup on DD-WRT, you'll now want to start using it. Here's a few tutorials on what you can do. Common examples are country blocklists and selective VPN routing using domain based rules.
 
 * [Basic ipset tutorial](https://www.dd-wrt.com/phpBB2/viewtopic.php?t=279586)
-
